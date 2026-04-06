@@ -1,19 +1,37 @@
-name: My First Workflow
+name: Generate Ascii workflow	
 on: push
 jobs:
-    first_job:
-        runs-on: ubuntu-latest
-        steps: 
-        - name: Checkout Repo
-          uses: actions/checkout@v6
-          
-        - name: Welcome Message
-          run: echo "My first github action"
-
-        - name: List Files
-          run: ls
-        
-        - name: Read File
-          run: cat README.md
-
-
+  build_job1:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install cowsay program
+      run: sudo apt-get install cowsay -y
+    - name: Execute cowsay CMD
+      run: cowsay -f dragon "Run for cover, I am a Dragon ....RAWR" >> dragon.txt
+    - name: Upload dragon.txt
+      uses: actions/upload-artifact@v4
+ 		with:
+          name: dragon-txt-file
+          path: dragon.txt
+		  	
+  test_job2:
+	needs: build_job1
+	runs-on: ubuntu-latest
+	steps: 
+	- uses: actions/download-artifact@v8
+	  with:
+        name: dragon-txt-file
+			
+	- name: Test file exists
+	  run: grep -i "dragon" dragon.txt  
+		  	
+  deploy_job3: 
+	needs: [test_job2]
+	runs-on: ubuntu-latest
+	steps:
+	  - uses: actions/download-artifact@v8
+		with:
+          name: dragon-txt-file
+		- name: Read file
+		  run: cat dragon.txt
+		  
